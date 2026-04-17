@@ -172,11 +172,28 @@ docker run -p 5000:5000 dropout-predictor
 
 ## MLflow Experiment Tracking
 
-All model runs are logged under the MLflow experiment `OULAD-Dropout-Prediction`. To view the MLflow UI after running the notebook:
+All model runs are logged under the MLflow experiment `OULAD-Dropout-Prediction`, including parameters, metrics, and tags for each experimental configuration.
+
+### Accessing the Logs
+
+Due to size, MLflow logs are distributed as a Release asset rather than committed to the repository. To view them:
+
+1. Download `mlruns.zip` from the [latest release](https://github.com/sheilagreen/OULAD-Dropout-Prediction/releases/latest)
+2. Unzip in the project root:
 
 ```bash
-mlflow ui --backend-store-uri file:///path/to/mlruns
+unzip mlruns.zip
 ```
+
+3. Launch the MLflow UI:
+
+```bash
+mlflow ui --backend-store-uri ./mlruns
+```
+
+4. Open `http://localhost:5000` in your browser to explore parameters, metrics, and run comparisons.
+
+Alternatively, rerunning `notebooks/Final_Modelling_V1.ipynb` end to end will regenerate the logs in a fresh `mlruns/` directory.
 
 ## Tech Stack
 
