@@ -96,23 +96,62 @@ cd src
 python app.py
 ```
 
-Test with:
+The API expects all 36 model features as JSON input (including pre-encoded one-hot categorical variables). Use the following example to test a single prediction:
 
 ```bash
 curl -X POST http://localhost:5000/predict \
   -H "Content-Type: application/json" \
   -d '{
     "studied_credits": 60,
+    "date_registration": -5,
+    "num_of_prev_attempts": 0,
     "total_clicks": 80,
+    "active_days": 5,
+    "avg_clicks_day": 16.0,
+    "last_activity": 20,
     "avg_score": 30.0,
     "num_submitted": 1,
-    "active_days": 5,
-    "last_activity": 20,
     "num_unsubmitted": 4,
-    "num_of_prev_attempts": 2,
-    "date_registration": -5
+    "highest_education_HE Qualification": 0,
+    "highest_education_Lower Than A Level": 1,
+    "highest_education_No Formal quals": 0,
+    "highest_education_Post Graduate Qualification": 0,
+    "region_East Midlands Region": 0,
+    "region_Ireland": 0,
+    "region_London Region": 1,
+    "region_North Region": 0,
+    "region_North Western Region": 0,
+    "region_Scotland": 0,
+    "region_South East Region": 0,
+    "region_South Region": 0,
+    "region_South West Region": 0,
+    "region_Wales": 0,
+    "region_West Midlands Region": 0,
+    "region_Yorkshire Region": 0,
+    "imd_band_10-20": 0,
+    "imd_band_20-30%": 1,
+    "imd_band_30-40%": 0,
+    "imd_band_40-50%": 0,
+    "imd_band_50-60%": 0,
+    "imd_band_60-70%": 0,
+    "imd_band_70-80%": 0,
+    "imd_band_80-90%": 0,
+    "imd_band_90-100%": 0,
+    "disability_Y": 0
   }'
 ```
+
+Expected response:
+
+```json
+{
+  "dropout_probability": 0.72,
+  "risk_tier": "High",
+  "threshold_used": 0.3
+}
+```
+
+**Note:** The current API expects features in their pre-encoded form. A production version would wrap preprocessing and the model in a single `sklearn.pipeline.Pipeline` so that callers can submit raw categorical values (e.g., `"region": "London Region"`). This is noted as future work in the final report.
 
 ### 7. Docker Deployment (Optional)
 
