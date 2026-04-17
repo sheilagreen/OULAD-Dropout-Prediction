@@ -1,2 +1,159 @@
-# OULAD-Dropout-Prediction
-Data 6545 Final Project
+# Predicting Student Dropout in Online Courses Using Early-Warning Learning Analytics
+
+**DATA 6545: Data Science and MLOps — Final Project**
+**Fairfield University | Dolan School of Business | Spring 2026**
+**Gabriela, Sheila and Sanjog**
+
+---
+
+## Overview
+
+Online education platforms face persistently high dropout rates, reducing course completion, learner satisfaction, and long-term revenue. This project develops an **early-warning predictive model** that estimates the probability a student will withdraw from an online course using only information available within the **first 30 days** of enrollment.
+
+The model is trained on the [Open University Learning Analytics Dataset (OULAD)](https://www.kaggle.com/datasets/anlgrbz/student-demographics-online-education-dataoulad), which contains **32,593 student-course enrollment records** spanning demographics, registration timing, VLE interaction logs, and assessment submissions.
+
+## Key Results
+
+| Model | Accuracy | Recall | Precision | F1 | AUC-ROC |
+|---|---|---|---|---|---|
+| Baseline Logistic Regression | .735 | .630 | .566 | .596 | .775 |
+| **Tuned Balanced Random Forest** | **.776** | **.609** | **.649** | **.628** | **.802** |
+| Tuned Gradient Boosting | .788 | .510 | .727 | .600 | .789 |
+
+The **Tuned Balanced Random Forest** is the recommended model, achieving the best balance of recall and precision (highest F1 of .628) with strong overall discrimination (AUC = .802).
+
+At an operating threshold of **0.30**, the model captures ~66.6% of actual withdrawals while flagging a manageable number of students for outreach.
+
+## Repository Structure
+
+```
+OULAD-Dropout-Prediction/
+├── data/                          # Dataset files (CSV)
+│   └── README.md                  # Data download instructions
+├── notebooks/
+│   └── Final_Modelling_V1.ipynb   # Main modeling notebook (EDA → MLflow → SHAP)
+├── src/
+│   └── app.py                     # Flask API for real-time scoring
+├── models/
+│   └── README.md                  # Model artifact descriptions
+├── requirements.txt               # Python dependencies
+├── Dockerfile                     # Docker container for API deployment
+├── .gitignore                     # Git ignore rules
+└── README.md                      # This file
+```
+
+## Setup Instructions
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/sheilagreen/OULAD-Dropout-Prediction.git
+cd OULAD-Dropout-Prediction
+```
+
+### 2. Create a Virtual Environment
+
+```bash
+python -m venv venv
+source venv/bin/activate        # macOS/Linux
+# venv\Scripts\activate         # Windows
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Download the Dataset
+
+Download the OULAD dataset from [Kaggle](https://www.kaggle.com/datasets/anlgrbz/student-demographics-online-education-dataoulad) and place the CSV files in the `data/` directory:
+
+- `studentInfo.csv`
+- `studentRegistration.csv`
+- `studentVle.csv`
+- `studentAssessment.csv`
+
+### 5. Run the Notebook
+
+Open and run `notebooks/Final_Modelling_V1.ipynb` in Jupyter or Google Colab. The notebook covers the full pipeline:
+
+1. Data loading and integration
+2. Data cleaning and target creation
+3. Feature engineering (Day 30 early-warning window)
+4. Exploratory data analysis
+5. Model training and comparison (6 configurations)
+6. MLflow experiment tracking
+7. Hyperparameter tuning
+8. Threshold analysis and intervention simulation
+9. Rolling window analysis
+10. SHAP model explainability
+
+### 6. Launch the Flask API (Optional)
+
+```bash
+cd src
+python app.py
+```
+
+Test with:
+
+```bash
+curl -X POST http://localhost:5000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "studied_credits": 60,
+    "total_clicks": 80,
+    "avg_score": 30.0,
+    "num_submitted": 1,
+    "active_days": 5,
+    "last_activity": 20,
+    "num_unsubmitted": 4,
+    "num_of_prev_attempts": 2,
+    "date_registration": -5
+  }'
+```
+
+### 7. Docker Deployment (Optional)
+
+```bash
+docker build -t dropout-predictor .
+docker run -p 5000:5000 dropout-predictor
+```
+
+## Methodology
+
+- **Prediction window:** Day 30 (early-warning constraint)
+- **Target:** Binary classification (Withdrawn = 1, all other outcomes = 0)
+- **Feature set:** 36 features after one-hot encoding (enrollment, demographic, VLE engagement, assessment performance)
+- **Models evaluated:** Logistic Regression, Random Forest, Gradient Boosting (default and tuned variants)
+- **Experiment tracking:** MLflow with 6 logged runs
+- **Explainability:** SHAP values for feature importance and directionality
+- **Evaluation focus:** Recall for dropout class (minimizing missed at-risk students)
+
+## MLflow Experiment Tracking
+
+All model runs are logged under the MLflow experiment `OULAD-Dropout-Prediction`. To view the MLflow UI after running the notebook:
+
+```bash
+mlflow ui --backend-store-uri file:///path/to/mlruns
+```
+
+## Tech Stack
+
+- Python 3.10+
+- pandas, NumPy, scikit-learn
+- MLflow (experiment tracking)
+- SHAP (model explainability)
+- Flask (API deployment)
+- Docker (containerization)
+- Matplotlib, Seaborn, Plotly (visualization)
+
+## Dataset Citation
+
+Kuzilek, J., Hlosta, M., & Zdrahal, Z. (2017). Open University Learning Analytics Dataset. *Scientific Data*, 4, 170171.
+
+## License
+
+This project is for academic purposes as part of DATA 6545 at Fairfield University.
+
